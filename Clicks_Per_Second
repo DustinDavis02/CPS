@@ -1,11 +1,52 @@
-from tkinter import Tk, Label, StringVar, OptionMenu, Canvas, Scrollbar, Frame, Button
+from tkinter import Tk, Label, StringVar, OptionMenu, Canvas, Scrollbar, Frame, Button, Entry
 import time
 import csv
+import json
+import os
+
+# Functions to Save and Load Profile
+def save_profile(username):
+    profile_data = {'username': username}
+    with open('user_profile.json', 'w') as f:
+        json.dump(profile_data, f)
+
+def load_profile():
+    if os.path.exists('user_profile.json'):
+        with open('user_profile.json', 'r') as f:
+            profile_data = json.load(f)
+            return profile_data['username']
+    else:
+        return None
+
+def update_username():
+    global username, username_label
+    new_username = username_entry.get()
+    if new_username:
+        username = new_username
+        username_label.config(text=f"Welcome, {username}")
+        save_profile(username)
 
 # Initialize the Tkinter window
 root = Tk()
 root.title("CPS Tracker")
-root.geometry("600x650")
+root.geometry("600x800")
+
+# Load or Create Profile
+username = load_profile()
+if username is None:
+    username = "Who are you!"
+    save_profile(username)
+
+# Welcome label
+username_label = Label(root, text=f"Welcome, {username}")
+username_label.pack(pady=5)
+
+username_entry = Entry(root)
+username_entry.pack(pady=5)
+username_entry.insert(0, username)
+
+username_button = Button(root, text="Update Username", command=update_username)  # Now it knows what update_username is
+username_button.pack(pady=5)
 
 # Initialize variables
 click_count = 0
@@ -16,10 +57,6 @@ is_test_running = False
 cooldown_time = 0
 cooldown_duration = 3
 cooldown_timer_text = None
-
-# Statistics Label
-statistics_label = Label(root, text="Statistics will appear here")
-statistics_label.pack(pady=10)
 
 # Calculate Statistics
 def calculate_statistics():
@@ -45,6 +82,7 @@ def export_data():
         
         for i, (cps, duration) in enumerate(cps_history):
             csvwriter.writerow([i+1, cps, duration])
+
 
 # Event Handlers
 def on_circle_click(event):
@@ -118,9 +156,14 @@ canvas.pack(pady=5)
 circle = canvas.create_oval(50, 50, 150, 150, fill="blue")
 canvas.tag_bind(circle, '<ButtonPress-1>', on_circle_click)
 
+# Statistics Label
+statistics_label = Label(root, text="Statistics will appear here")
+statistics_label.pack(pady=10)
+
 # Progress Bar
 canvas_progress = Canvas(root, width=200, height=40)
 canvas_progress.pack(pady=5)
+
 
 # New Frame to hold the history Canvas and Scrollbar
 history_frame_container = Frame(root)
