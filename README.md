@@ -6,6 +6,12 @@ CPS Tracker is a Python application that allows users to measure their Clicks Pe
 
 ## Installation
 
+**Windows**
+
+You can download the latest executable for the CPS Tracker from the [releases page](https://github.com/DustinDavis02/Clicks_Per_Second/releases). No need to install Python or any dependencies; just download and run the executable.
+
+**Linux, macOS**
+
 This project uses Python and Tkinter for GUI. Make sure you have Python installed.
 
 1. Clone the repository:
@@ -23,6 +29,12 @@ This project uses Python and Tkinter for GUI. Make sure you have Python installe
 ---
 
 ## Usage
+
+**Windows**
+
+Run the executable to launch the application.
+
+**Linux, macOS**
 
 Run the Python script to launch the application.
 
