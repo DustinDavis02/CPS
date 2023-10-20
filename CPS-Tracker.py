@@ -3,10 +3,24 @@ import time
 import csv
 import json
 import os
+import platform
+
+# New Global Variable for High Scores Label
+high_scores_label = None
+
+# New Function to Display High Scores
+def display_high_scores():
+    global high_scores_label
+    sorted_scores = sorted(cps_history, key=lambda x: x[0], reverse=True)[:5]  # Top 5 scores
+    high_scores_str = "\n".join([f"Score: {score}, Duration: {duration}" for score, duration in sorted_scores])
+    high_scores_label.config(text=f"High Scores:\n{high_scores_str}")
 
 # Functions to Save and Load Profile
-def save_profile(username):
-    profile_data = {'username': username}
+def save_profile(username, cps_history):
+    profile_data = {
+        'username': username,
+        'cps_history': cps_history
+    }
     with open('user_profile.json', 'w') as f:
         json.dump(profile_data, f)
 
@@ -14,9 +28,9 @@ def load_profile():
     if os.path.exists('user_profile.json'):
         with open('user_profile.json', 'r') as f:
             profile_data = json.load(f)
-            return profile_data['username']
+            return profile_data['username'], profile_data.get('cps_history', [])
     else:
-        return None
+        return None, []
 
 def update_username():
     global username, username_label
@@ -29,13 +43,14 @@ def update_username():
 # Initialize the Tkinter window
 root = Tk()
 root.title("CPS Tracker")
-root.geometry("600x800")
+root.geometry("600x850")
 
 # Load or Create Profile
-username = load_profile()
+username, cps_history = load_profile()
 if username is None:
     username = "Who are you!"
-    save_profile(username)
+    cps_history = []
+    save_profile(username, cps_history)
 
 # Welcome label
 username_label = Label(root, text=f"Welcome, {username}")
@@ -83,6 +98,17 @@ def export_data():
         for i, (cps, duration) in enumerate(cps_history):
             csvwriter.writerow([i+1, cps, duration])
 
+    # Open the folder containing the exported file
+    directory = os.getcwd()  # Get current directory
+
+    # Detect the operating system and open the folder accordingly
+    if platform.system() == 'Windows':
+        os.startfile(directory)
+    elif platform.system() == 'Darwin':
+        os.system(f'open "{directory}"')
+    elif platform.system() == 'Linux':
+        os.system(f'xdg-open "{directory}"')
+
 
 # Event Handlers
 def on_circle_click(event):
@@ -125,14 +151,16 @@ def start_cooldown_timer():
         cooldown_time = 0  # Reset cooldown_time to allow new tests to start
 
 def calculate_cps():
-    global is_test_running, cooldown_time
+    global is_test_running, cooldown_time, cps_history
     cps = click_count  # In a simple implementation, CPS will be the same as click count
-    cps_history.append((cps, timer_var.get()))  # Add to history as a tuple (cps, duration)
+    cps_history.append((cps, timer_var.get())) # Add to history as a tuple (cps, duration)
+    save_profile(username, cps_history)
     update_history()  # Update history display
     calculate_statistics()  # Update statistics
     is_test_running = False  # Reset test status flag
     cooldown_time = time.time() + cooldown_duration  # Set the cooldown time
     start_cooldown_timer()  # Start the cooldown countdown timer
+    display_high_scores()  # Update high scores
 
 # Export Button
 export_button = Button(root, text="Export Data", command=export_data)
@@ -141,6 +169,10 @@ export_button.pack(pady=10)
 def update_history():
     history_str = "\n".join([f"Test {i+1}: {cps} CPS (Duration: {duration}s)" for i, (cps, duration) in enumerate(cps_history)])
     history_label.config(text=f"History:\n{history_str}")
+
+# Add this line where you are defining your other labels to create the High Scores label
+high_scores_label = Label(root, text="High Scores will appear here")
+high_scores_label.pack(pady=10)
 
 # Create and place widgets
 Label(root, text="Clicks Per Second (CPS) Tracker").pack(pady=10)
