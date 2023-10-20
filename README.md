@@ -11,7 +11,7 @@ This project uses Python and Tkinter for GUI. Make sure you have Python installe
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/DustinDavis02/CPS-Tracker.git
+    git clone https://github.com/DustinDavis02/Clicks_Per_Second.git
     ```
     
 2. Navigate to the project directory:
